@@ -1,0 +1,121 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+
+public class BatalhaEspacial extends JPanel implements ActionListener {
+
+    private Timer timer;
+    private Nave nave;
+    private ArrayList<Tiro> tiros;
+
+    public BatalhaEspacial() {
+        setFocusable(true);
+        setBackground(Color.BLACK);
+        nave = new Nave(250, 450);
+        tiros = new ArrayList<>();
+        addKeyListener(new TecladoAdapter());
+        timer = new Timer(15, this);
+        timer.start();
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        nave.desenhar(g);
+        for (Tiro t : tiros) {
+            t.desenhar(g);
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        nave.mover();
+        for (int i = 0; i < tiros.size(); i++) {
+            Tiro t = tiros.get(i);
+            t.mover();
+            if (t.getY() < 0) {
+                tiros.remove(i);
+            }
+        }
+        repaint();
+    }
+
+    private class TecladoAdapter extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            nave.keyPressed(e);
+            if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                tiros.add(new Tiro(nave.getX() + 20, nave.getY()));
+            }
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            nave.keyReleased(e);
+        }
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Batalha Espacial");
+        BatalhaEspacial jogo = new BatalhaEspacial();
+        frame.add(jogo);
+        frame.setSize(600, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
+
+class Nave {
+    private int x, y;
+    private int dx;
+
+    public Nave(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public void mover() {
+        x += dx;
+        if (x < 0) x = 0;
+        if (x > 550) x = 550;
+    }
+
+    public void desenhar(Graphics g) {
+        g.setColor(Color.GREEN);
+        g.fillRect(x, y, 40, 20);
+    }
+
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) dx = -5;
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) dx = 5;
+    }
+
+    public void keyReleased(KeyEvent e) {
+        dx = 0;
+    }
+
+    public int getX() { return x; }
+    public int getY() { return y; }
+}
+
+class Tiro {
+    private int x, y;
+
+    public Tiro(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public void mover() {
+        y -= 10;
+    }
+
+    public void desenhar(Graphics g) {
+        g.setColor(Color.RED);
+        g.fillRect(x, y, 5, 10);
+    }
+
+    public int getY() { return y; }
+}
